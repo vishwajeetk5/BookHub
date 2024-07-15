@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en" xmlns:th="https://www.thymeleaf.com">
+  <head>
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+      <script src='https://kit.fontawesome.com/b8044e56f8.js' crossorigin='anonymous'></script>
+    <title>Book Hub</title>
+      <style>
+          * { box-sizing: border-box; }
+
+/* FlipBook */
+
+body {
+  /* or any other parent wrapper */
+  margin: 0;
+  display: flex;
+  min-height: 100dvh;
+  perspective: 1000px;
+  font: 1em/1.4 "Poppins", sans-serif;
+  overflow: hidden;
+  color: hsl(180 68% 5%);
+  background-image: radial-gradient(circle farthest-corner at 50% 50%, hsl(187 20% 88%) 30%, hsl(149 20% 94%) 100%);
+}
+.book::hover{
+cursor: -webkit-grabbing;
+cursor: grabbing;
+}
+.book {
+  position: relative;
+  display: flex;
+  margin: auto;
+  width: 40cqmin;
+  /*1* let pointer event go trough pages of lower Z than .book */
+  pointer-events: none;
+  transform-style: preserve-3d;
+  transition: translate 1s;
+  translate: calc(min(var(--c), 1) * 50%) 0%;
+  /* Incline on the X axis for pages preview */
+  rotate: 1 0 0 30deg;
+}
+
+.page {
+  /* PS: Don't go below thickness 0.5 or the pages might transpare */
+  --thickness: 4;
+  flex: none;
+  display: flex;
+  width: 100%;
+  font-size: 2cqmin;
+  /*1* allow pointer events on pages */
+  pointer-events: all;
+  user-select: none;
+  transform-style: preserve-3d;
+  transform-origin: left center;
+  transition:
+    transform 1s,
+    rotate 1s ease-in calc((min(var(--i), var(--c)) - max(var(--i), var(--c))) * 50ms);
+  translate: calc(var(--i) * -100%) 0px 0px;
+  transform: translateZ( calc((var(--c) - var(--i) - 0.5) * calc(var(--thickness) * .23cqmin)));
+  rotate: 0 1 0 calc(clamp(0, var(--c) - var(--i), 1) * -180deg);
+}
+
+.front,
+.back {
+  position: relative;
+  flex: none;
+  width: 100%;
+  backface-visibility: hidden;
+  overflow: hidden;
+  background-color: #fff;
+  /* Fix backface visibility Firefox: */
+  translate: 0px;
+}
+
+.back {
+  translate: -100% 0;
+  rotate: 0 1 0 180deg;
+}
+
+
+/* That's it. Your FlipBook customization styles: */
+
+.book {
+  counter-reset: page -1;
+  & a {
+    color: inherit;
+  }
+}
+
+.page {
+  box-shadow: 0em .5em 1em -.2em #00000020;
+}
+
+.front,
+.back {
+  display: flex;
+  flex-flow: column wrap;
+  justify-content: space-between;
+  padding: 2em;
+  border: 1px solid #0002;
+
+  &:has(img) {
+    padding: 0;
+  }
+
+  & img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &::after {
+    position: absolute;
+    bottom: 1em;
+    counter-increment: page;
+    content: counter(page) ".";
+    font-size: 0.8em;
+  }
+}
+.cover {
+  &::after {
+    content: "";
+  }
+}
+.front {
+  &::after {
+    right: 1em;
+  }
+  background: linear-gradient(to left, #f7f7f7 80%, #eee 100%);
+  border-radius: .1em .5em .5em .1em;
+}
+.back {
+  &::after {
+    left: 1em;
+  }
+  background-image: linear-gradient(to right, #f7f7f7 80%, #eee 100%);
+  border-radius: .5em .1em .1em .5em;
+}
+
+.cover {
+  background: radial-gradient(circle farthest-corner at 80% 20%, hsl(150 80% 20% / .3) 0%, hsl(170 60% 10% / .1) 100%),
+    hsl(231, 32%, 29%) url("https://picsum.photos/id/984/800/900") 50% / cover;
+  color: hsl(200 30% 98%);
+}
+      </style>
+  </head>
+  <body class="d-flex flex-column">
+   
+   <nav class="navbar navbar-expand-lg navbar-light bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand text-white" href="#">Book Hub</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link active text-white" aria-current="page" href="/">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-white" href="available_books">Available Books</a>
+        </li>
+         <li class="nav-item">
+          <a class="nav-link text-white" href="my_books">My Books</a>
+        </li>
+      </ul>
+      <div>
+      		 <a class="nav-link text-white" href="book_register">New Book Register</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+   <div class="container text-center my-5">
+   		<h1>WELCOME TO NEW BOOK-HUB</h1>
+   		<h6>"A room without books is like a body without a soul." - Marcus Tullius Cicero</h6>
+<!--   		<img src="/images/bg.png" width="360px"/>-->
+   </div>
+   <div class="book">
+       <div class="page">
+           <div class="front cover">
+               <h1>BookHub Project</h1>
+               <p>2024.<br>AJP-II (Proficiency Course-3)</p>
+           </div>
+           <div class="back">
+               <h2>Tech Stack Used</h2>
+               <p>The BookHub project utilizes a modern tech stack including Java, Spring Boot, Hibernate, MySQL, Thymeleaf, and Maven.</p>
+           </div>
+       </div>
+
+       <div class="page">
+           <div class="front">
+               <h2>Java</h2><h1><i class="fa-brands fa-java"></i></h1>
+               <p>Java is the core programming language used for developing the BookHub application.</p>
+           </div>
+           <div class="back">
+               <img src="https://miro.medium.com/v2/resize:fit:600/1*ljHUhFnaBissdRBe7DIo6g.png" alt="Java Image">
+           </div>
+       </div>
+
+       <div class="page">
+           <div class="front">
+               <h2>Spring Boot</h2>
+               <p>Spring Boot is used to simplify the setup and development of the BookHub application.</p>
+           </div>
+           <div class="back">
+               <p>Additionally, Spring Boot DevTools enhance the development experience with features like automatic application restarts and LiveReload support.</p>
+           </div>
+       </div>
+
+       <div class="page">
+           <div class="front">
+               <h2>Hibernate<i class="fa-solid fa-code"></i></h2>
+               <p>Hibernate provides ORM capabilities, mapping Java objects to database tables in the BookHub application.</p>
+           </div>
+           <div class="back">
+               <p>MySQL is used as the relational database management system for storing data in the BookHub application.</p>
+           </div>
+       </div>
+
+       <div class="page">
+           <div class="front">
+               <h2>Thymeleaf <i class="fa-brands fa-themeisle"></i></h2>
+               <p>Thymeleaf is used for templating to create dynamic web pages in the BookHub application.</p>
+           </div>
+           <div class="back">
+               <p>Maven is used for managing project dependencies and building the BookHub application.</p>
+           </div>
+       </div>
+
+       <div class="page">
+           <div class="front">
+               <img src="https://picsum.photos/id/1073/600/600" alt="Tech Stack Image">
+           </div>
+           <div class="back cover">
+               <h3>That's all, folks</h3>
+               <p>BookHub Project and Tech Stack:<br><a href="mailto:your@email.com">javamon</a></p>
+           </div>
+       </div>
+   </div>
+   <script>
+       function init() {
+    // Run your javascript code here
+    const flipBook = (elBook) => {
+        elBook.style.setProperty("--c", 0); // Set current page
+        elBook.querySelectorAll(".page").forEach((page, idx) => {
+          page.style.setProperty("--i", idx);
+          page.addEventListener("click", (evt) => {
+            if (evt.target.closest("a")) return;
+            const curr = evt.target.closest(".back") ? idx : idx + 1;
+            elBook.style.setProperty("--c", curr);
+          });
+        });
+      };
+
+      document.querySelectorAll(".book").forEach(flipBook);
+ }
+document.addEventListener("DOMContentLoaded", init, false);
+   </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    
+  </body>
+</html>
